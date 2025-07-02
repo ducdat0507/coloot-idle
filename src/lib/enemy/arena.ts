@@ -4,11 +4,13 @@ import type { SaverLoader } from "../saveload/saveload";
 import { getGame } from "../singleton";
 import { clamp } from "../utils";
 import Enemy, { EnemyType, type EnemyDrop } from "./enemy";
-import { getWorldDataForStage } from "./world";
+import { getWorldDataForStage, ISEKAI_BASE } from "./world";
+import { formatRoman } from "../format";
 
 export default class Arena implements SaverLoader {
     currentStage: number = 0;
     maxStage: number = 0;
+    maxStageLifetime: number = 0;
     isBossActive: boolean = false;
 
     currentEnemy: Enemy;
@@ -59,6 +61,7 @@ export default class Arena implements SaverLoader {
             const wasBoss = this.currentEnemy.type === EnemyType.BOSS;
             if (wasBoss && this.isOnHighestStage) {
                 this.maxStage++;
+                this.maxStageLifetime = Math.max(this.maxStageLifetime, this.maxStage);
                 this.gotoMaxStage();
                 this.isBossActive = false;
                 player.heal();
@@ -96,9 +99,23 @@ export default class Arena implements SaverLoader {
         return this.currentStage === this.maxStage;
     }
 
+    get stageData() {
+        return getWorldDataForStage(this.currentStage);
+    }
+
     get stageName(): string {
-        const data = getWorldDataForStage(this.currentStage);
+        const data = this.stageData;
         return `${data.title} ${this.currentStage - data.stage + 1}`;
+    }
+
+    get isekaiName(): string {
+        const data = this.stageData;
+        return data.isekai ? `Isekai ${formatRoman(data.isekai)}` : "Home World"
+    }
+
+    get positionName(): string {
+        if (this.maxStageLifetime >= ISEKAI_BASE) return this.isekaiName + " - " + this.stageName;
+        else return this.stageName;
     }
 
     /* Stage Navigation */
@@ -144,6 +161,7 @@ export default class Arena implements SaverLoader {
         return {
             currentStage: this.currentStage,
             maxStage: this.maxStage,
+            maxStageLifetime: this.maxStageLifetime,
             isBossActive: this.isBossActive,
             currentEnemy: this.currentEnemy.save(),
         };
@@ -152,6 +170,7 @@ export default class Arena implements SaverLoader {
     load(data: any): void {
         this.currentStage = data.currentStage;
         this.maxStage = data.maxStage;
+        this.maxStageLifetime = data.maxStageLifetime || 0;
         this.isBossActive = data.isBossActive;
         this.currentEnemy.load(data.currentEnemy);
     }

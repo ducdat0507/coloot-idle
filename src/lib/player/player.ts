@@ -183,8 +183,9 @@ export default class Player implements SaverLoader {
     get xpRequired(): Decimal {
         // scales according to enemy hp, scale level similar to stage
         const INCREASE_PER_STAGE = 1.618 ** 5;
+        let level = this.level;
         return new Decimal(1000).mul(
-            Decimal.pow(INCREASE_PER_STAGE, this.level - 1),
+            Decimal.pow(INCREASE_PER_STAGE, level - 1),
         );
     }
 

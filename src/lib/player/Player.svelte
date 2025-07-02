@@ -18,14 +18,14 @@
             </div>
             <div class="stat" title="Rarity">
                 <img src={I.stat.rarity} alt="Magic Find" />
-                x{F(player.rarityMultiplier, true)}
+                &times;{F(player.rarityMultiplier, true)}
             </div>
             <div
                 class="stat"
                 title="Magic Find (Multiplies Stats of found Equipment)"
             >
                 <img src={I.stat.magicFind} alt="Magic Find" />
-                x{F(player.magicFind, true)}
+                &times;{F(player.magicFind, true)}
             </div>
         </div>
         <div class="flex flex-col gap-1 items-end">

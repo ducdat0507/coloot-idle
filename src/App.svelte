@@ -38,7 +38,7 @@
 </script>
 
 <svelte:head>
-    <title>{$game.arena.stageName}</title>
+    <title>{$game.arena.positionName}</title>
 </svelte:head>
 
 <main

@@ -6,6 +6,13 @@ export interface WorldData {
     background: string;
 }
 
+export interface WorldAndIsekaiData {
+    isekai: number;
+    stage: number;
+    title: string;
+    background: string;
+}
+
 export const WORLD: WorldData[] = [
     {
         stage: 0,
@@ -48,18 +55,60 @@ export const WORLD: WorldData[] = [
         background: I.backgrounds.deepDungeon,
     },
     {
-        stage: 180,
+        stage: 175,
         title: "Hellscape",
         background: I.backgrounds.hellscape,
     },
     {
-        stage: 230,
+        stage: 200,
         title: "Portal to Another World",
         background: I.backgrounds.portal,
     },
+    {
+        stage: Infinity,
+        title: "",
+        background: "",
+    },
 ];
 
-export function getWorldDataForStage(stage: number): WorldData {
-    const data = WORLD.filter((data) => stage >= data.stage).at(-1);
-    return data ?? WORLD[0];
+export const ISEKAI_BASE = 225;
+export const ISEKAI_STAGE_INCREASE = 10;
+export const ISEKAI_INCREASE = ISEKAI_STAGE_INCREASE * (WORLD.length - 1);
+
+export function getIsekaiForStage(stage: number): number {
+    const b = ISEKAI_BASE;
+    const i = ISEKAI_INCREASE;
+    return Math.floor(
+        (-(b - i / 2) + Math.sqrt((b - i / 2) ** 2 + 2 * i * stage)) / i,
+    );
+}
+export function getStageForIsekai(isekai: number): number {
+    const b = ISEKAI_BASE;
+    const i = ISEKAI_INCREASE;
+    return (b - i / 2) * isekai + (i / 2) * isekai * isekai;
+}
+
+export function getWorldDataForStage(stage: number): WorldAndIsekaiData {
+    const isekai = getIsekaiForStage(stage);
+    const isekaiStart = getStageForIsekai(isekai);
+    const index = Math.max(
+        WORLD.findLastIndex((data, index) => {
+            return (
+                stage >=
+                data.stage +
+                    isekaiStart +
+                    isekai * index * ISEKAI_STAGE_INCREASE
+            );
+        }),
+        0,
+    );
+    return {
+        isekai,
+        stage:
+            WORLD[index].stage +
+            isekaiStart +
+            isekai * index * ISEKAI_STAGE_INCREASE,
+        title: WORLD[index].title,
+        background: WORLD[index].background,
+    };
 }
